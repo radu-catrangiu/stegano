@@ -1,0 +1,61 @@
+Tema 2 IOCLA
+
+Task 1:
+    Functia "bruteforce_singlebyte_xor" are o variabila locala de un
+BYTE in care tin cheia. Aceasta variabila este incrementanta intr-un
+loop. In acest loop apelez functia "xor_matrix" (care face XOR cu toate
+valorile din imagine), apoi apelez "find_revient" daca aceasta functie
+intoarce o valoare mai mica decat [img_height] inseamna ca am gasit
+linia cu mesajul. Altfel se trece mai departe, se apeleaza iar "xor_matrix"
+pentru a aduce imaginea la starea initiala si se incrementeaza variabila
+locala. Când este găsită cheia și linia la care se afla mesajul, acestea
+sunt intoarse folosind EBX respectiv EAX.
+    Functia "find_revient" are ca variabila locala string-ul "revient\0".
+Aceasta functie are un loop principal in care este parcurs vectorul [img],
+iar pentru fiecare valoare este apelată funcția "check_revient". Când este
+gasit string-ul "revient" este apelata funcția "get_line_number" care imparte
+byte_id-ul curent la numarul de linii pentru a obtine linia pe care se afla
+string-ul.
+    Functia "check_revient" primește doi vectori, img (vector DWORD) și
+string-ul "revient" (vector BYTE). Aceasta functie parcurge folosind acelasi
+index ambii vectori și compară valorile. Daca o valoare diferă acesta întoarce
+0, iar daca nicio valoare nu diferă înseamnă că a fost găsit string-ul "revient"
+și întoarce valoarea 0.
+
+Task 2:
+    Este apelată funcția de la task-ul 1 pentru a obtine cheia si linia
+la care se afla mesajul, apoi folosind rezultatele intoarse de functia
+"bruteforce_singlebyte_xor" este apelata functia "compute_new_key" care
+aplică formula descrisă în enunț. Dupa obtinerea noii chei, este apelata
+functia "write_msg_and_encode". Dupa executia acestei functii se apeleaza
+functia "print_image" din scheletul temei.
+    Functia "write_msg_and_encode" primeste ca parametri o cheie de criptare
+si linia la care să fie scris mesajul. Aceasta are ca variabila locala
+string-ul ce urmeaza sa fie scris. Este calculat byte_id-ul de unde se va
+incepe scrierea. Intr-un loop sunt parcurse simultan raspunsul si imaginea,
+având loc scrierea răspunsului. După terminarea buclei este apelată functia
+"xor_matrix" care aplică noua cheie pe întreaga imagine.
+
+Task 3:
+    Se obtin întâi text-ul si byte_id-ul din argv[3] si argv[4]. Se apeleaza
+atoi pentru a converti byte_id-ul intr-un intreg. Apoi se apeleaza functia
+"morse_encrypt" (cu acelasi prototip ca in enunt). La final se apeleaza
+functia "print_image" din scheletul temei.
+    Functia "morse_encrypt" parcurge text-ul primit ca argument până cand 
+este intalnit '\0', iar pentru fiecare caracter din string este apelata 
+functia "write_morse" și este actualizat byte_id-ul adaugând offset-ul intors
+de functia "write_morse".
+    Functia "write_morse" primeste un caracter, vectorul img și un byte_id
+de la care se dorește începerea scrierii. Funcția întoarce numărul de caractere
+scrise. Aceasta functie are rolul unui dictionar care traduce fiecare caracter
+in codul morse, rezultatul fiind scris in vectorul [img] incepand de la
+byte_id-ul primit ca parametru.
+
+Task 4:
+    TODO:
+
+Task 5:
+    TODO:
+
+Task 6:
+    TODO:

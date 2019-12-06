@@ -171,15 +171,6 @@ get_line_number:
     xor edx, edx
     div DWORD [img_width]
 
-    ; ;; DEBUGGING CODE START
-    ; test edx, edx
-    ; jnz skip_newline
-    ; NEWLINE
-    ; PRINT_UDEC 4, eax ;AICI AVEM INDEXUL LINIEI
-    ; PRINT_STRING " "
-    ; skip_newline:
-    ; ;; DEBUGGING CODE END
-
     mov esp, ebp
     pop ebp
     ret
@@ -203,11 +194,6 @@ check_revient:
         mov eax, 1
         cmp ebx, edx
         jnz check_revient_no_match;
-
-        ; PRINT_CHAR ebx
-        ; PRINT_STRING " "
-        ; PRINT_CHAR edx
-        ; NEWLINE
 
     inc ecx
     cmp ecx, 7
@@ -269,8 +255,6 @@ find_revient:
         pop ecx
         pop eax
 
-        ; PRINT_HEX 4, ebx
-        ; NEWLINE
         test ebx, ebx
         jz find_revient_found_match
 
@@ -285,11 +269,10 @@ find_revient:
     ret
 
     find_revient_found_match:
-    push eax ;; Push argument
+    push eax ;; Push argument (byte_id)
     call get_line_number
     add esp, 4 ;; SKIP argument
-    ; PRINT_UDEC 4, eax ;; IN EAX ESTE NUMARUL LINIEI
-    ; NEWLINE
+    ;; IN EAX ESTE NUMARUL LINIEI
     
     mov esp, ebp
     pop ebp
@@ -303,8 +286,6 @@ bruteforce_singlebyte_xor:
 
     sub esp, 1      ; local variable KEY
     mov BYTE [ebp - 1], 0x00      ; KEY = 0
-
-    ; call print_matrix ; FOR DEBUGGING
 
     singlebyte_bruteforce_loop:
         ;; XOR MATRIX
@@ -324,8 +305,6 @@ bruteforce_singlebyte_xor:
         push eax
         call xor_matrix
 
-        ; call print_matrix ; FOR DEBUGGING
-
     inc BYTE [ebp - 1]
     test BYTE [ebp - 1], 0xFF
     jnz singlebyte_bruteforce_loop
@@ -344,11 +323,6 @@ compute_new_key:
     push ebp        ; save the value of ebp
     mov ebp, esp    ; ebp now points to the top of the stack
 
-    ; NEWLINE
-    ; PRINT_STRING "COMPUTE_NEW_KEY - OLD KEY: "
-    ; PRINT_UDEC 4, [ebp + 8]
-    ; NEWLINE
-
     mov eax, [ebp + 8]
     mov ebx, 2
     mul ebx
@@ -356,10 +330,6 @@ compute_new_key:
     mov ebx, 5
     div ebx
     sub eax, 4
-
-    ; PRINT_STRING "COMPUTE_NEW_KEY - NEW KEY: "
-    ; PRINT_UDEC 4, eax
-    ; NEWLINE
 
     mov esp, ebp
     pop ebp
@@ -382,39 +352,25 @@ write_msg_and_encode:
     mov BYTE [ebp - 3], 's'
     mov BYTE [ebp - 2], '.'
     mov BYTE [ebp - 1], 0
-    ; PRINT_STRING [ebp - 28] ; "C'est un proverbe francais."
-
-    ; NEWLINE
-    ; PRINT_STRING "New key: "
-    ; PRINT_UDEC 4, [ebp + 8]
-    ; NEWLINE
-    ; PRINT_STRING "Line to write to: "
-    ; PRINT_UDEC 4, [ebp + 12]
-    ; NEWLINE
+    ; [ebp - 28] => "C'est un proverbe francais."
 
     mov esi, [img]
 
-    mov eax, [ebp + 12]
+    mov eax, [ebp + 12] ; line number
     mov edi, [img_width]
-    mul edi
+    mul edi ; => eax = byte_id-ul de unde se va incepe scrierea
 
-    ; PRINT_STRING [esi + 4 * ecx]
-    ; NEWLINE
     xor ecx, ecx
 
     lea edi, [ebp - 28]
     write_msg:
-        ; mov ebx, [esi + 4 * ecx]
         xor edx, edx
         mov BYTE dl, [edi + ecx]
         mov [esi + 4 * eax], edx
         inc eax
         mov ebx, [esi + 4 * ecx]
-        ; PRINT_CHAR edx
-        ; PRINT_STRING " "
-        ; PRINT_CHAR ebx  
-        ; NEWLINE
-        cmp ecx, 27 ; strlen() - 1
+
+        cmp ecx, 27 ; strlen(raspuns) - 1 = 27
         jz end_write_msg
     inc ecx
     jmp write_msg
@@ -436,28 +392,13 @@ write_morse:
 
     mov bl, [ebp + 8]
 
-    ; PRINT_CHAR [ebp + 8]
-    ; PRINT_STRING " "
-    ; PRINT_UDEC 4, [ebp + 16]
-    ; PRINT_STRING " "
     mov edx, [ebp + 16] ;; byte_id
     mov edi, [ebp + 12] ;; *img
-    ; PRINT_CHAR [edi + 4 * edx]
-    ; NEWLINE
-
-    ;; Write to image
-    ; mov eax, [ebp + 8]
-    ; mov [edi + 4 * edx], eax
-
-    ; xor eax, eax
-    ; mov eax, 1
 
     cmp bl, 0x00,
     je write_terminator
     cmp bl, ','
     je encrypt_COMMA
-    cmp bl, ' '
-    je encrypt_BLANK
     cmp bl, 'A'
     je encrypt_A
     cmp bl, 'B'
@@ -536,16 +477,6 @@ write_morse:
         mov DWORD [edi + 4 * edx], 0
         
         xor eax, eax
-    jmp write_morse_end
-
-    encrypt_BLANK: ; `| `
-        ; mov DWORD [edi + 4 * edx], "|"
-        ; inc edx
-        ; mov DWORD [edi + 4 * edx], ' '
-        ; inc edx
-
-        xor eax, eax
-        ; mov eax, 2
     jmp write_morse_end
 
     encrypt_COMMA: ; `--..-- `
@@ -1277,22 +1208,15 @@ solve_task2:
     ; call print_matrix
     jmp done
 solve_task3:
-    ; call print_matrix
-    ; NEWLINE
-
     xor eax, eax
-    mov eax, [ebp + 12]
-    mov ebx, [eax + 12] ; text
-    lea esi, [ebx]
-    ; PRINT_STRING [ebx]
-    ; NEWLINE
+    mov eax, [ebp + 12] ; EAX = argv
+    mov ebx, [eax + 12] ; argv[3] => text
+    lea esi, [ebx] ; ESI = text pointer
 
-    mov ebx, [eax + 16] ; index
+    mov ebx, [eax + 16] ; argv[4] => byte_id
     push ebx
     call atoi
     add esp, 4
-    ; PRINT_UDEC 4, eax 
-    ; NEWLINE
 
     push eax
     push esi
@@ -1303,9 +1227,6 @@ solve_task3:
     push DWORD [img_width]
     push DWORD [img]
     call print_image
-
-    ; NEWLINE
-    ; call print_matrix
 
     jmp done
 solve_task4:
