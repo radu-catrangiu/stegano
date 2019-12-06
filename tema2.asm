@@ -428,7 +428,7 @@ write_msg_and_encode:
     ret
 ; end write_msg_and_encode
 
-;; int write_morse(char x, int *img, int idx)
+;; int write_morse(char x, int *img, int byte_id)
 ;; intoarce numarul de caractere scrise
 write_morse:
     push ebp        ; save the value of ebp
@@ -436,14 +436,14 @@ write_morse:
 
     mov bl, [ebp + 8]
 
-    PRINT_CHAR [ebp + 8]
-    PRINT_STRING " "
-    PRINT_UDEC 4, [ebp + 16]
-    PRINT_STRING " "
-    mov edx, [ebp + 16] ;; idx
+    ; PRINT_CHAR [ebp + 8]
+    ; PRINT_STRING " "
+    ; PRINT_UDEC 4, [ebp + 16]
+    ; PRINT_STRING " "
+    mov edx, [ebp + 16] ;; byte_id
     mov edi, [ebp + 12] ;; *img
-    PRINT_CHAR [edi + 4 * edx]
-    NEWLINE
+    ; PRINT_CHAR [edi + 4 * edx]
+    ; NEWLINE
 
     ;; Write to image
     ; mov eax, [ebp + 8]
@@ -454,6 +454,10 @@ write_morse:
 
     cmp bl, 0x00,
     je write_terminator
+    cmp bl, ','
+    je encrypt_COMMA
+    cmp bl, ' '
+    je encrypt_BLANK
     cmp bl, 'A'
     je encrypt_A
     cmp bl, 'B'
@@ -535,16 +539,16 @@ write_morse:
     jmp write_morse_end
 
     encrypt_BLANK: ; `| `
-        mov DWORD [edi + 4 * edx], "|"
-        inc edx
-        mov DWORD [edi + 4 * edx], ' '
-        inc edx
+        ; mov DWORD [edi + 4 * edx], "|"
+        ; inc edx
+        ; mov DWORD [edi + 4 * edx], ' '
+        ; inc edx
 
         xor eax, eax
-        mov eax, 2
+        ; mov eax, 2
     jmp write_morse_end
 
-    encrypt_COMMA: ; `- -..- - `
+    encrypt_COMMA: ; `--..-- `
         mov DWORD [edi + 4 * edx], "-"
         inc edx
         mov DWORD [edi + 4 * edx], "-"
@@ -917,7 +921,7 @@ write_morse:
         inc edx
 
         xor eax, eax
-        mov eax, 2
+        mov eax, 5
     jmp write_morse_end
 
     encrypt_Z: ; `--.. `
@@ -933,7 +937,7 @@ write_morse:
         inc edx
 
         xor eax, eax
-        mov eax, 2
+        mov eax, 5
     jmp write_morse_end
 
     encrypt_1: ; `.---- `
@@ -1127,18 +1131,7 @@ morse_encrypt:
     push ebp        ; save the value of ebp
     mov ebp, esp    ; ebp now points to the top of the stack
 
-    ; PRINT_UDEC 4, [ebp + 16] ;; byte_id
-    ; NEWLINE
-
     mov esi, [ebp + 12] ;; load msg
-    ; PRINT_STRING [esi]
-    ; NEWLINE
-
-    mov edi, [ebp + 8] ;;load img
-    ; push DWORD [img_height]
-    ; push DWORD [img_width]
-    ; push edi
-    ; call print_image
 
     xor ecx, ecx
     morse_encrypt_loop:
@@ -1152,10 +1145,7 @@ morse_encrypt:
         push edx ;; char
         call write_morse
         add esp, 12
-
         add [ebp + 16], eax
-        ; PRINT_CHAR dl
-        ; NEWLINE
 
         inc ecx
     jmp morse_encrypt_loop
