@@ -1168,7 +1168,76 @@ lsb_encode:
     mov esp, ebp
     pop ebp
     ret
-; end morse_encrypt
+; end lsb_encode
+
+; char lsb_decode(int* img, int byte_id);
+build_char:
+    push ebp        ; save the value of ebp
+    mov ebp, esp    ; ebp now points to the top of the stack
+
+    mov esi, [ebp + 8] ;; img
+    mov edi, [ebp + 12] ;; byte_id
+    
+    xor eax, eax
+
+    mov bl, 0x80
+    xor ecx, ecx
+    build_char_loop:
+        mov edx, [esi + 4 * edi]
+        and edx, 0x00000001
+
+        test edx, edx
+        ;; bit-ul curent deja este 0.
+        jz build_char_continue
+        ;; daca trebuie sa fie 1, se face OR
+        or al, bl
+
+        build_char_continue:
+
+        shr bl, 1
+        inc edi
+        inc ecx
+    cmp ecx, 8
+    jnz build_char_loop
+
+    mov esp, ebp
+    pop ebp
+    ret
+; end build_char
+
+; void lsb_decode(int* img, int byte_id);
+lsb_decode:
+    push ebp        ; save the value of ebp
+    mov ebp, esp    ; ebp now points to the top of the stack
+
+    sub esp, 20 ; variabila in care vom pune mesajul gasit
+
+    mov esi, [ebp + 8] ;; img
+    mov edi, [ebp + 12] ;; byte_id
+
+    xor ecx, ecx
+    lsb_decode_loop:
+        push ecx
+        push edi ; byte_id
+        push esi ; img
+        call build_char
+        pop esi
+        pop edi
+        pop ecx
+
+        mov BYTE [esp + ecx], al
+        inc ecx
+        add edi, 8
+    test eax, eax
+    jnz lsb_decode_loop
+
+    PRINT_STRING [ebp - 20]
+    NEWLINE
+
+    mov esp, ebp
+    pop ebp
+    ret
+; end lsb_decode
 
 main:
     ; Prologue
@@ -1329,7 +1398,19 @@ solve_task4:
 
     jmp done
 solve_task5:
-    ; TODO Task5
+    xor eax, eax
+    mov eax, [ebp + 12] ; EAX = argv
+
+    mov ebx, [eax + 12] ; argv[3] => byte_id as string
+    push ebx
+    call atoi
+    add esp, 4
+
+    dec eax ;; ??? byte_id incepe de la 0?
+    push eax ;; byte_id as int (return of atoi)
+    push DWORD [img]
+    call lsb_decode
+
     jmp done
 solve_task6:
     ; TODO Task6

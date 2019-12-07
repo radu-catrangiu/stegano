@@ -67,7 +67,17 @@ restul biților se face SHIFT RIGHT. Functia returneaza numarul de scrieri, adic
 intotdeauna 8.
 
 Task 5:
-    TODO:
+    Se obtine byte_id-ul din argv[3] si se converteste la int prin apelul functiei
+atoi, apoi se apeleaza functia "lsb_decode" (cu acelasi prototip ca in enunt).
+    Functia "lsb_decode" itereaza prin vectorul primit ca parametru, din 8 in 8,
+pornind de la byte_id. Aceasta apeleaza functia "build_char" care intoarce un BYTE
+ce este stocat pe stivă intr-o variabila locala.
+    Functia "build_char" foloseste masca 0x00000001 pentru a obtine LSB-ul din
+valoarea curenta. Se verifica daca rezultatul operatiei AND este zero, caz in care
+se trece mai departe deoarece in EAX deja bitii au fost initializati cu 0, altfel
+se realizeaza operatia OR cu masca stocata in BL. Pentru a avansa se face SHIFT
+RIGHT pe aceasta masca. La final, valoarea din EAX reprezinta un caracter din
+mesajul criptat.
 
 Task 6:
     TODO:
