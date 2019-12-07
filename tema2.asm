@@ -1094,6 +1094,82 @@ morse_encrypt:
 ; end morse_encrypt
 
 
+;; void break_to_bits_and_write(int* img, int c, int byte_id);
+break_to_bits_and_write:
+    push ebp        ; save the value of ebp
+    mov ebp, esp    ; ebp now points to the top of the stack
+
+    mov edi, [ebp + 8] ;; img
+    mov edx, [ebp + 12] ;; load int c ---> dl = char c
+    mov esi, [ebp + 16]
+
+    mov bl, 0x80 ; -> mask 0b10000000
+    xor ecx, ecx
+    get_bits_loop:
+        mov al, dl
+        and al, bl ;; AND cu masca
+        jnz not_zero
+        
+    ;;; zero:
+        and DWORD [edi + 4 * esi], 0xFFFFFFFE
+        jmp continue
+
+        not_zero:
+        or DWORD [edi + 4 * esi], 0x00000001
+        continue:
+
+        add DWORD esi, 1
+        shr bl, 1
+        inc ecx
+    cmp ecx, 8
+    jne get_bits_loop
+
+    mov eax, ecx
+
+    mov esp, ebp
+    pop ebp
+    ret
+; end break_to_bits_and_write
+
+;; void lsb_encode(int* img, char* msg, int byte_id);
+lsb_encode:
+    push ebp        ; save the value of ebp
+    mov ebp, esp    ; ebp now points to the top of the stack
+
+    mov edi, [ebp + 8] ;; load img
+    mov esi, [ebp + 12] ;; load msg
+    
+    xor ecx, ecx
+    lsb_encode_loop:
+        xor edx, edx
+        mov BYTE dl, [esi + ecx]
+        
+            push ecx;
+            push esi
+
+            push DWORD [ebp + 16]
+            push edx ; current char 
+            push edi
+            call break_to_bits_and_write
+            pop edi
+            pop edx
+            add esp, 4
+
+            add DWORD [ebp + 16], eax
+
+            pop esi
+            pop ecx
+        cmp dl, 0
+        je lsb_encode_loop_end
+        inc ecx
+    jmp lsb_encode_loop
+    lsb_encode_loop_end:
+
+    mov esp, ebp
+    pop ebp
+    ret
+; end morse_encrypt
+
 main:
     ; Prologue
     ; Do not modify!
@@ -1213,13 +1289,13 @@ solve_task3:
     mov ebx, [eax + 12] ; argv[3] => text
     lea esi, [ebx] ; ESI = text pointer
 
-    mov ebx, [eax + 16] ; argv[4] => byte_id
+    mov ebx, [eax + 16] ; argv[4] => byte_id as string
     push ebx
     call atoi
     add esp, 4
 
-    push eax
-    push esi
+    push eax ;; byte_id as int (return of atoi)
+    push esi  ;; msg pointer
     push DWORD [img]
     call morse_encrypt
 
@@ -1230,7 +1306,27 @@ solve_task3:
 
     jmp done
 solve_task4:
-    ; TODO Task4
+    xor eax, eax
+    mov eax, [ebp + 12] ; EAX = argv
+    mov ebx, [eax + 12] ; argv[3] => text
+    lea esi, [ebx] ; ESI = text pointer
+
+    mov ebx, [eax + 16] ; argv[4] => byte_id as string
+    push ebx
+    call atoi
+    add esp, 4
+
+    dec eax ;; ??? byte_id incepe de la 0?
+    push eax ;; byte_id as int (return of atoi)
+    push esi  ;; msg pointer
+    push DWORD [img]
+    call lsb_encode
+
+    push DWORD [img_height]
+    push DWORD [img_width]
+    push DWORD [img]
+    call print_image
+
     jmp done
 solve_task5:
     ; TODO Task5

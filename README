@@ -52,7 +52,19 @@ in codul morse, rezultatul fiind scris in vectorul [img] incepand de la
 byte_id-ul primit ca parametru.
 
 Task 4:
-    TODO:
+    Se obtin întâi text-ul si byte_id-ul din argv[3] si argv[4]. Se apeleaza
+atoi pentru a converti byte_id-ul intr-un intreg. Apoi se apeleaza functia
+"lsb_encode" (cu acelasi prototip ca in enunt). La final se apeleaza functia
+"print_image" din scheletul temei.
+    Functia "lsb_encode" parcurge text-ul și pentru fiecare caracter, INCLUSIV
+caracterul '\0', se apeleaza functia "break_to_bits_and_write" si se 
+incrementanta byte_id-ul cu numarul de valori modificate (intotdeauna 8).
+    Functia "break_to_bits_and_write" foloseste o mască pentru a obtine biții.
+Intr-o bucla se face AND cu masca pe caracter si se verifica flag-ul de zero 
+(se face jnz). Daca bit-ul este 0, pe valoarea din imagine se face AND cu masca
+0xFFFFFFFE, altfel se face OR cu masca 0x00000001. Pentru a avansa si a obtine
+restul biților se face SHIFT RIGHT. Functia returneaza numarul de scrieri, adica
+intotdeauna 8.
 
 Task 5:
     TODO:
